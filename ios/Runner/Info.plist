@@ -45,5 +45,10 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<!-- Permisos de Ubicación para Google Maps y Geolocalización en tiempo real -->
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Py55 necesita tu ubicación para mostrar tu posición en el mapa y encontrar mototaxis cercanas.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Py55 requiere tu ubicación en tiempo real para transmitir la posición de la mototaxi durante el viaje.</string>
 </dict>
 </plist>
