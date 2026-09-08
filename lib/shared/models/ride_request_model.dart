@@ -34,6 +34,42 @@ class RideRequestModel {
     required this.fechaCreacion,
   });
 
+  RideRequestModel copyWith({
+    String? id,
+    String? pasajeroId,
+    String? conductorId,
+    double? origenLat,
+    double? origenLng,
+    String? origenDireccion,
+    double? destinoLat,
+    double? destinoLng,
+    String? destinoDireccion,
+    double? distanciaKm,
+    double? tarifaMin,
+    double? tarifaMax,
+    double? tarifaAcordada,
+    String? estado,
+    DateTime? fechaCreacion,
+  }) {
+    return RideRequestModel(
+      id: id ?? this.id,
+      pasajeroId: pasajeroId ?? this.pasajeroId,
+      conductorId: conductorId ?? this.conductorId,
+      origenLat: origenLat ?? this.origenLat,
+      origenLng: origenLng ?? this.origenLng,
+      origenDireccion: origenDireccion ?? this.origenDireccion,
+      destinoLat: destinoLat ?? this.destinoLat,
+      destinoLng: destinoLng ?? this.destinoLng,
+      destinoDireccion: destinoDireccion ?? this.destinoDireccion,
+      distanciaKm: distanciaKm ?? this.distanciaKm,
+      tarifaMin: tarifaMin ?? this.tarifaMin,
+      tarifaMax: tarifaMax ?? this.tarifaMax,
+      tarifaAcordada: tarifaAcordada ?? this.tarifaAcordada,
+      estado: estado ?? this.estado,
+      fechaCreacion: fechaCreacion ?? this.fechaCreacion,
+    );
+  }
+
   /// Convierte la instancia a un [Map] compatible con Firestore / RTDB.
   Map<String, dynamic> toMap() {
     return {

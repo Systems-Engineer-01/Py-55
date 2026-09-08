@@ -9,6 +9,7 @@ import 'package:py55/features/auth/auth_provider.dart';
 import 'package:py55/features/map/location_service.dart';
 import 'package:py55/features/map/map_service.dart';
 import 'package:py55/features/map/models/driver_location_model.dart';
+import 'package:py55/features/ride_request/screens/ride_request_screen.dart';
 import 'package:py55/shared/widgets/verified_badge.dart';
 
 /// Pantalla principal para el Pasajero con mapa interactivo en tiempo real de mototaxis cercanas.
@@ -227,23 +228,18 @@ class _PassengerMapScreenState extends State<PassengerMapScreen> {
                   ),
                   const SizedBox(height: 24),
 
-                  // Botón para solicitar viaje
+                  // Botón para solicitar viaje a esta mototaxi
                   SizedBox(
                     width: double.infinity,
                     height: 50,
                     child: ElevatedButton.icon(
                       onPressed: () {
                         Navigator.pop(context);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('Solicitud iniciada para $nombre'),
-                            backgroundColor: AppTheme.secondaryColor,
-                          ),
-                        );
+                        _openRideRequestScreen();
                       },
                       icon: const Icon(Icons.send_rounded),
                       label: const Text(
-                        'Solicitar Viaje',
+                        'Solicitar Viaje Aquí',
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -257,6 +253,21 @@ class _PassengerMapScreenState extends State<PassengerMapScreen> {
           },
         );
       },
+    );
+  }
+
+  void _openRideRequestScreen() {
+    final currentLatLng = _currentPosition != null
+        ? LatLng(_currentPosition!.latitude, _currentPosition!.longitude)
+        : null;
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => RideRequestScreen(
+          initialOrigin: currentLatLng,
+        ),
+      ),
     );
   }
 
@@ -277,6 +288,28 @@ class _PassengerMapScreenState extends State<PassengerMapScreen> {
             onPressed: () => context.read<AuthProvider>().signOut(),
           ),
         ],
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        child: SizedBox(
+          width: double.infinity,
+          height: 54,
+          child: FloatingActionButton.extended(
+            onPressed: _openRideRequestScreen,
+            backgroundColor: AppTheme.primaryColor,
+            elevation: 6,
+            icon: const Icon(Icons.local_taxi_rounded, color: Colors.white),
+            label: const Text(
+              'Pedir Mototaxi Ahora',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+          ),
+        ),
       ),
       body: Stack(
         children: [
@@ -335,7 +368,7 @@ class _PassengerMapScreenState extends State<PassengerMapScreen> {
                             ),
                           ),
                           const Text(
-                            'Toca una mototaxi en el mapa para ver su conductor.',
+                            'Toca una mototaxi o el botón inferior para pedir viaje.',
                             style: TextStyle(
                               fontSize: 12,
                               color: Colors.grey,
