@@ -7,6 +7,7 @@ class UserModel {
   final String? fotoPerfilUrl;
   final String? dniUrl; // URL del DNI subido (aplica a ambos roles)
   final bool verificado;
+  final bool esAdmin;
   final DateTime fechaRegistro;
 
   UserModel({
@@ -17,6 +18,7 @@ class UserModel {
     this.fotoPerfilUrl,
     this.dniUrl,
     this.verificado = false,
+    this.esAdmin = false,
     required this.fechaRegistro,
   });
 
@@ -30,6 +32,7 @@ class UserModel {
       'fotoPerfilUrl': fotoPerfilUrl,
       'dniUrl': dniUrl,
       'verificado': verificado,
+      'esAdmin': esAdmin,
       'fechaRegistro': fechaRegistro.millisecondsSinceEpoch,
     };
   }
@@ -44,6 +47,7 @@ class UserModel {
       fotoPerfilUrl: map['fotoPerfilUrl'] as String?,
       dniUrl: map['dniUrl'] as String?,
       verificado: map['verificado'] as bool? ?? false,
+      esAdmin: map['esAdmin'] as bool? ?? false,
       fechaRegistro: DateTime.fromMillisecondsSinceEpoch(
         map['fechaRegistro'] as int,
       ),
@@ -59,6 +63,7 @@ class UserModel {
     String? fotoPerfilUrl,
     String? dniUrl,
     bool? verificado,
+    bool? esAdmin,
     DateTime? fechaRegistro,
   }) {
     return UserModel(
@@ -69,10 +74,11 @@ class UserModel {
       fotoPerfilUrl: fotoPerfilUrl ?? this.fotoPerfilUrl,
       dniUrl: dniUrl ?? this.dniUrl,
       verificado: verificado ?? this.verificado,
+      esAdmin: esAdmin ?? this.esAdmin,
       fechaRegistro: fechaRegistro ?? this.fechaRegistro,
     );
   }
 
   @override
-  String toString() => 'UserModel(id: $id, nombre: $nombre, rol: $rol)';
+  String toString() => 'UserModel(id: $id, nombre: $nombre, rol: $rol, esAdmin: $esAdmin)';
 }

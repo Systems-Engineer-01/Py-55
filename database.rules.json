@@ -1,0 +1,10 @@
+{
+  "rules": {
+    "ubicaciones_activas": {
+      ".read": "auth != null",
+      "$userId": {
+        ".write": "auth != null && auth.uid === $userId"
+      }
+    }
+  }
+}

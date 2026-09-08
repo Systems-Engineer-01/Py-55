@@ -6,6 +6,7 @@ import 'package:py55/core/constants.dart';
 import 'package:py55/core/theme.dart';
 import 'package:py55/features/map/map_service.dart';
 import 'package:py55/features/map/models/driver_location_model.dart';
+import 'package:py55/features/rating/screens/rating_screen.dart';
 import 'package:py55/features/ride_request/ride_request_service.dart';
 import 'package:py55/shared/models/ride_request_model.dart';
 
@@ -86,6 +87,25 @@ class _RideTrackingScreenState extends State<RideTrackingScreen> {
     } finally {
       if (mounted) setState(() => _isUpdatingStatus = false);
     }
+  }
+
+  void _openRatingScreen(RideRequestModel ride) {
+    final isDriver = widget.userRole == AppConstants.rolMototaxista;
+    final quienCalifica = isDriver ? (ride.conductorId ?? '') : ride.pasajeroId;
+    final aCalificado = isDriver ? ride.pasajeroId : (ride.conductorId ?? '');
+    final nombreCalificado = isDriver ? 'Pasajero' : 'Conductor';
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => RatingScreen(
+          rideId: ride.id,
+          quienCalifica: quienCalifica,
+          aCalificado: aCalificado,
+          nombrePersonaCalificada: nombreCalificado,
+        ),
+      ),
+    );
   }
 
   int _getStepIndex(String estado) {
@@ -396,9 +416,10 @@ class _RideTrackingScreenState extends State<RideTrackingScreen> {
                         SizedBox(
                           width: double.infinity,
                           height: 48,
-                          child: ElevatedButton(
-                            onPressed: () => Navigator.pop(context),
-                            child: const Text('Volver al Inicio'),
+                          child: ElevatedButton.icon(
+                            icon: const Icon(Icons.star_rounded),
+                            label: const Text('Calificar Servicio'),
+                            onPressed: () => _openRatingScreen(ride),
                           ),
                         ),
                       ],
