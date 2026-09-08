@@ -26,7 +26,7 @@ class AppConstants {
   static const String rideCancelado = 'cancelado';
 
   // ── Firestore collections ──────────────────────────────────────
-  static const String usersCollection = 'users';
-  static const String driversCollection = 'drivers';
-  static const String ridesCollection = 'rides';
+  static const String usersCollection = 'usuarios';
+  static const String driversCollection = 'conductores';
+  static const String ridesCollection = 'viajes';
 }

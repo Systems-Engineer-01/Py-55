@@ -1,14 +1,16 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import 'package:py55/main.dart';
+import 'package:py55/features/auth/screens/phone_input_screen.dart';
 
 void main() {
-  testWidgets('HomeScreen shows app title', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    // Nota: No inicializamos Firebase en tests; probamos solo el widget.
-    await tester.pumpWidget(const Py55App());
+  testWidgets('PhoneInputScreen muestra elementos básicos',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(home: PhoneInputScreen()),
+    );
 
-    // Verify that the home screen shows the expected text.
-    expect(find.text('Py55 - vehículo en tiempo real'), findsOneWidget);
+    // Verifica que el título y el botón estén presentes.
+    expect(find.text('Ingresa tu número'), findsOneWidget);
+    expect(find.text('Enviar código'), findsOneWidget);
   });
 }
