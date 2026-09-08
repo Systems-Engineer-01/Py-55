@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:py55/core/constants.dart';
 import 'package:py55/core/theme.dart';
 import 'package:py55/features/ride_request/ride_request_service.dart';
+import 'package:py55/features/ride_request/screens/ride_tracking_screen.dart';
 import 'package:py55/shared/models/ride_request_model.dart';
 
 /// Pantalla de espera mientras se busca una mototaxi disponible.
@@ -60,6 +61,22 @@ class _RideSearchingScreenState extends State<RideSearchingScreen>
     }
   }
 
+  void _navigateToTrackingScreen(String rideId) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => RideTrackingScreen(
+              rideId: rideId,
+              userRole: AppConstants.rolPasajero,
+            ),
+          ),
+        );
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return PopScope(
@@ -109,44 +126,17 @@ class _RideSearchingScreenState extends State<RideSearchingScreen>
               );
             }
 
-            if (ride.estado == AppConstants.rideAceptado) {
-              return Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(24.0),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const CircleAvatar(
-                        radius: 40,
-                        backgroundColor: Colors.green,
-                        child: Icon(Icons.check_rounded,
-                            size: 50, color: Colors.white),
-                      ),
-                      const SizedBox(height: 24),
-                      const Text(
-                        '¡Mototaxi en Camino!',
-                        style: TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Un conductor ha aceptado tu solicitud de viaje.',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(color: Colors.grey.shade600),
-                      ),
-                      const SizedBox(height: 32),
-                      SizedBox(
-                        width: double.infinity,
-                        height: 48,
-                        child: ElevatedButton(
-                          onPressed: () => Navigator.pop(context),
-                          child: const Text('Ver Viaje en Progreso'),
-                        ),
-                      ),
-                    ],
-                  ),
+            if (ride.estado == AppConstants.rideAceptado ||
+                ride.estado == AppConstants.rideEnCurso) {
+              _navigateToTrackingScreen(ride.id);
+              return const Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    CircularProgressIndicator(),
+                    SizedBox(height: 16),
+                    Text('¡Viaje aceptado! Abriendo mapa de seguimiento...'),
+                  ],
                 ),
               );
             }

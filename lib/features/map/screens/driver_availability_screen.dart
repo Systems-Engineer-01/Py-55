@@ -8,6 +8,7 @@ import 'package:py55/core/theme.dart';
 import 'package:py55/features/auth/auth_provider.dart';
 import 'package:py55/features/map/location_service.dart';
 import 'package:py55/features/map/map_service.dart';
+import 'package:py55/features/ride_request/screens/incoming_ride_requests_screen.dart';
 
 /// Pantalla para el mototaxista con control de disponibilidad "Disponible / No disponible"
 /// y transmisión de su ubicación GPS en tiempo real a Firebase Realtime Database.
@@ -30,7 +31,6 @@ class _DriverAvailabilityScreenState extends State<DriverAvailabilityScreen> {
   Position? _currentPosition;
   Set<Marker> _markers = {};
 
-  // Ubicación por defecto (Lima, Perú) si aún no carga el GPS
   static const LatLng _defaultLocation = LatLng(-12.046374, -77.042793);
 
   @override
@@ -138,6 +138,15 @@ class _DriverAvailabilityScreenState extends State<DriverAvailabilityScreen> {
     }
   }
 
+  void _openIncomingRequests() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const IncomingRideRequestsScreen(),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final user = context.watch<AuthProvider>().userModel;
@@ -156,6 +165,30 @@ class _DriverAvailabilityScreenState extends State<DriverAvailabilityScreen> {
           ),
         ],
       ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: _isAvailable
+          ? Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: SizedBox(
+                width: double.infinity,
+                height: 54,
+                child: FloatingActionButton.extended(
+                  onPressed: _openIncomingRequests,
+                  backgroundColor: AppTheme.secondaryColor,
+                  elevation: 6,
+                  icon: const Icon(Icons.list_alt_rounded, color: Colors.white),
+                  label: const Text(
+                    'Ver Solicitudes Entrantes',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+            )
+          : null,
       body: Stack(
         children: [
           // Mapa de Google Maps
