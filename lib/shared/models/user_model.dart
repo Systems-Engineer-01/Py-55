@@ -5,6 +5,7 @@ class UserModel {
   final String rol; // "pasajero" | "mototaxista"
   final String nombre;
   final String? fotoPerfilUrl;
+  final String? dniUrl; // URL del DNI subido (aplica a ambos roles)
   final bool verificado;
   final DateTime fechaRegistro;
 
@@ -14,6 +15,7 @@ class UserModel {
     required this.rol,
     required this.nombre,
     this.fotoPerfilUrl,
+    this.dniUrl,
     this.verificado = false,
     required this.fechaRegistro,
   });
@@ -26,6 +28,7 @@ class UserModel {
       'rol': rol,
       'nombre': nombre,
       'fotoPerfilUrl': fotoPerfilUrl,
+      'dniUrl': dniUrl,
       'verificado': verificado,
       'fechaRegistro': fechaRegistro.millisecondsSinceEpoch,
     };
@@ -39,10 +42,34 @@ class UserModel {
       rol: map['rol'] as String,
       nombre: map['nombre'] as String,
       fotoPerfilUrl: map['fotoPerfilUrl'] as String?,
+      dniUrl: map['dniUrl'] as String?,
       verificado: map['verificado'] as bool? ?? false,
       fechaRegistro: DateTime.fromMillisecondsSinceEpoch(
         map['fechaRegistro'] as int,
       ),
+    );
+  }
+
+  /// Crea una copia con campos opcionales actualizados.
+  UserModel copyWith({
+    String? id,
+    String? telefono,
+    String? rol,
+    String? nombre,
+    String? fotoPerfilUrl,
+    String? dniUrl,
+    bool? verificado,
+    DateTime? fechaRegistro,
+  }) {
+    return UserModel(
+      id: id ?? this.id,
+      telefono: telefono ?? this.telefono,
+      rol: rol ?? this.rol,
+      nombre: nombre ?? this.nombre,
+      fotoPerfilUrl: fotoPerfilUrl ?? this.fotoPerfilUrl,
+      dniUrl: dniUrl ?? this.dniUrl,
+      verificado: verificado ?? this.verificado,
+      fechaRegistro: fechaRegistro ?? this.fechaRegistro,
     );
   }
 

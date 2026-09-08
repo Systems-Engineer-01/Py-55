@@ -62,6 +62,35 @@ class DriverProfileModel {
     );
   }
 
+  /// Crea una copia con campos opcionales actualizados.
+  DriverProfileModel copyWith({
+    String? userId,
+    String? dniUrl,
+    String? licenciaUrl,
+    String? soatUrl,
+    String? fotoVehiculoUrl,
+    String? placaVehiculo,
+    String? estadoVerificacion,
+    bool? disponible,
+    double? lat,
+    double? lng,
+    double? calificacionPromedio,
+  }) {
+    return DriverProfileModel(
+      userId: userId ?? this.userId,
+      dniUrl: dniUrl ?? this.dniUrl,
+      licenciaUrl: licenciaUrl ?? this.licenciaUrl,
+      soatUrl: soatUrl ?? this.soatUrl,
+      fotoVehiculoUrl: fotoVehiculoUrl ?? this.fotoVehiculoUrl,
+      placaVehiculo: placaVehiculo ?? this.placaVehiculo,
+      estadoVerificacion: estadoVerificacion ?? this.estadoVerificacion,
+      disponible: disponible ?? this.disponible,
+      lat: lat ?? this.lat,
+      lng: lng ?? this.lng,
+      calificacionPromedio: calificacionPromedio ?? this.calificacionPromedio,
+    );
+  }
+
   @override
   String toString() =>
       'DriverProfileModel(userId: $userId, estado: $estadoVerificacion)';
