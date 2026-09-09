@@ -154,12 +154,15 @@ class AuthProvider extends ChangeNotifier {
     _isLoading = true;
     notifyListeners();
 
+    final userName = _firebaseUser!.displayName ??
+        (_firebaseUser!.email?.split('@').first ?? 'Usuario');
+
     try {
       final user = UserModel(
         id: _firebaseUser!.uid,
         telefono: _firebaseUser!.phoneNumber ?? '',
         rol: rol,
-        nombre: 'Usuario',
+        nombre: userName,
         fechaRegistro: DateTime.now(),
       );
 
@@ -176,7 +179,47 @@ class AuthProvider extends ChangeNotifier {
         id: _firebaseUser!.uid,
         telefono: _firebaseUser!.phoneNumber ?? '',
         rol: rol,
-        nombre: 'Usuario',
+        nombre: userName,
+        fechaRegistro: DateTime.now(),
+      );
+      _status = AuthStatus.needsVerificationUpload;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  /// Guarda un nuevo usuario con [rol] y [phone] (para el flujo de Google Auth).
+  Future<void> saveUserWithRoleAndPhone(String rol, String phone) async {
+    if (_firebaseUser == null) return;
+
+    _isLoading = true;
+    notifyListeners();
+
+    final userName = _firebaseUser!.displayName ??
+        (_firebaseUser!.email?.split('@').first ?? 'Usuario');
+
+    try {
+      final user = UserModel(
+        id: _firebaseUser!.uid,
+        telefono: phone,
+        rol: rol,
+        nombre: userName,
+        fechaRegistro: DateTime.now(),
+      );
+
+      await _authService.saveUserToFirestore(user).timeout(
+        const Duration(seconds: 4),
+        onTimeout: () {},
+      );
+      _userModel = user;
+      _status = AuthStatus.needsVerificationUpload;
+    } catch (_) {
+      _userModel = UserModel(
+        id: _firebaseUser!.uid,
+        telefono: phone,
+        rol: rol,
+        nombre: userName,
         fechaRegistro: DateTime.now(),
       );
       _status = AuthStatus.needsVerificationUpload;

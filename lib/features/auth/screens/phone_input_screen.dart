@@ -5,9 +5,10 @@ import 'package:provider/provider.dart';
 import 'package:py55/core/constants.dart';
 import 'package:py55/features/auth/auth_provider.dart';
 import 'package:py55/features/auth/auth_service.dart';
+import 'package:py55/features/auth/google_auth_service.dart';
 import 'package:py55/features/auth/screens/otp_verification_screen.dart';
 
-/// Pantalla para ingresar el número de teléfono y solicitar un OTP.
+/// Pantalla para ingresar el número de teléfono y solicitar un OTP o iniciar sesión con Google.
 class PhoneInputScreen extends StatefulWidget {
   const PhoneInputScreen({super.key});
 
@@ -18,6 +19,7 @@ class PhoneInputScreen extends StatefulWidget {
 class _PhoneInputScreenState extends State<PhoneInputScreen> {
   final _phoneController = TextEditingController();
   final _authService = AuthService();
+  final _googleAuthService = GoogleAuthService();
 
   String _selectedCountryCode = '+51'; // Perú por defecto
   bool _isLoading = false;
@@ -92,6 +94,29 @@ class _PhoneInputScreenState extends State<PhoneInputScreen> {
         // No-op: el usuario puede seguir ingresando el código manualmente.
       },
     );
+  }
+
+  Future<void> _signInWithGoogle() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final credential = await _googleAuthService.signInWithGoogle();
+      if (credential == null) {
+        if (mounted) setState(() => _isLoading = false);
+        return;
+      }
+      // AuthProvider se encargará de reaccionar a authStateChanges
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _errorMessage = 'Error al iniciar sesión con Google: $e';
+        });
+      }
+    }
   }
 
   Future<void> _signInDemo() async {
@@ -255,6 +280,52 @@ class _PhoneInputScreenState extends State<PhoneInputScreen> {
                           'Enviar código',
                           style: TextStyle(fontSize: 16),
                         ),
+                ),
+              ),
+
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  const Expanded(child: Divider()),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    child: Text('O', style: TextStyle(color: Colors.grey[600])),
+                  ),
+                  const Expanded(child: Divider()),
+                ],
+              ),
+              const SizedBox(height: 16),
+
+              // ── Botón Continuar con Google ──
+              SizedBox(
+                height: 52,
+                child: OutlinedButton.icon(
+                  onPressed: _isLoading ? null : _signInWithGoogle,
+                  style: OutlinedButton.styleFrom(
+                    side: BorderSide(color: Colors.grey.shade400),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    backgroundColor: Colors.white,
+                    foregroundColor: Colors.black87,
+                  ),
+                  icon: Image.network(
+                    'https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg',
+                    height: 24,
+                    width: 24,
+                    errorBuilder: (_, __, ___) => const Icon(
+                      Icons.account_circle_rounded,
+                      size: 24,
+                      color: Colors.red,
+                    ),
+                  ),
+                  label: const Text(
+                    'Continuar con Google',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                 ),
               ),
 

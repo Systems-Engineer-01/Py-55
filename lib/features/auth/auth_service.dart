@@ -1,8 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:py55/shared/models/user_model.dart';
 
-/// Servicio de autenticación con Firebase Auth (teléfono) y Firestore.
+/// Servicio de autenticación con Firebase Auth (teléfono / Google) y Firestore.
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -74,8 +75,14 @@ class AuthService {
 
   // ── Sesión ──────────────────────────────────────────────────────
 
-  /// Cierra la sesión actual.
+  /// Cierra la sesión actual (Firebase Auth y Google Sign-In).
   Future<void> signOut() async {
+    try {
+      final googleSignIn = GoogleSignIn();
+      if (await googleSignIn.isSignedIn()) {
+        await googleSignIn.signOut();
+      }
+    } catch (_) {}
     await _auth.signOut();
   }
 

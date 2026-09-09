@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:py55/core/constants.dart';
 import 'package:py55/features/auth/auth_provider.dart';
+import 'package:py55/features/auth/screens/complete_phone_screen.dart';
 
 /// Pantalla de selección de rol (pasajero o mototaxista).
 ///
@@ -10,10 +11,26 @@ import 'package:py55/features/auth/auth_provider.dart';
 class RoleSelectionScreen extends StatelessWidget {
   const RoleSelectionScreen({super.key});
 
+  void _onRoleSelected(BuildContext context, String rol) {
+    final authProvider = context.read<AuthProvider>();
+    final phone = authProvider.firebaseUser?.phoneNumber;
+
+    if (phone != null && phone.isNotEmpty) {
+      // Login por teléfono: ya tiene número de celular en Firebase Auth
+      authProvider.saveUserWithRole(rol);
+    } else {
+      // Login por Google: solicitar teléfono de contacto en CompletePhoneScreen
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => CompletePhoneScreen(selectedRole: rol),
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final authProvider = context.read<AuthProvider>();
 
     return Scaffold(
       body: SafeArea(
@@ -48,8 +65,7 @@ class RoleSelectionScreen extends StatelessWidget {
                 title: 'Soy pasajero',
                 subtitle: 'Solicita viajes de forma rápida y segura.',
                 color: theme.colorScheme.primary,
-                onTap: () =>
-                    authProvider.saveUserWithRole(AppConstants.rolPasajero),
+                onTap: () => _onRoleSelected(context, AppConstants.rolPasajero),
               ),
 
               const SizedBox(height: 20),
@@ -61,7 +77,7 @@ class RoleSelectionScreen extends StatelessWidget {
                 subtitle: 'Acepta viajes y genera ingresos.',
                 color: theme.colorScheme.tertiary,
                 onTap: () =>
-                    authProvider.saveUserWithRole(AppConstants.rolMototaxista),
+                    _onRoleSelected(context, AppConstants.rolMototaxista),
               ),
 
               const Spacer(),
