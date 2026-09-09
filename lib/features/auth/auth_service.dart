@@ -84,6 +84,8 @@ class AuthService {
   /// Traduce códigos de error de Firebase Auth a mensajes en español.
   static String friendlyError(String code) {
     switch (code) {
+      case 'operation-not-allowed':
+        return 'Firebase rechazó la solicitud. Debes agregar la huella SHA-1 de tu app en la consola de Firebase.';
       case 'invalid-verification-code':
         return 'El código ingresado es inválido. Intenta de nuevo.';
       case 'too-many-requests':

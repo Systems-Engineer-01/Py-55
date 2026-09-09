@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:py55/core/constants.dart';
 import 'package:py55/features/auth/auth_provider.dart';
+import 'package:py55/features/verification/verification_service.dart';
+import 'package:py55/shared/models/driver_profile_model.dart';
 import 'package:py55/shared/widgets/verified_badge.dart';
 
 /// Pantalla que se muestra mientras el estado de verificación es "pendiente".
@@ -8,6 +11,29 @@ import 'package:py55/shared/widgets/verified_badge.dart';
 /// El usuario ve un mensaje indicando que su documentación está en revisión.
 class VerificationStatusScreen extends StatelessWidget {
   const VerificationStatusScreen({super.key});
+
+  Future<void> _approveForDev(BuildContext context, AuthProvider auth) async {
+    final userId = auth.userModel?.id ?? auth.firebaseUser?.uid;
+    if (userId != null) {
+      final service = VerificationService();
+      final currentProfile = await service.getDriverProfile(userId);
+      if (currentProfile != null) {
+        await service.saveDriverProfile(
+          currentProfile.copyWith(
+            estadoVerificacion: AppConstants.verificacionAprobado,
+          ),
+        );
+      } else {
+        await service.saveDriverProfile(
+          DriverProfileModel(
+            userId: userId,
+            estadoVerificacion: AppConstants.verificacionAprobado,
+          ),
+        );
+      }
+      await auth.refreshUser();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -87,6 +113,18 @@ class VerificationStatusScreen extends StatelessWidget {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
+                ),
+              ),
+
+              const SizedBox(height: 16),
+
+              // ── Botón Dev: Aprobar para pruebas ──
+              TextButton.icon(
+                onPressed: () => _approveForDev(context, auth),
+                icon: const Icon(Icons.check_circle_outline_rounded, color: Colors.green),
+                label: const Text(
+                  'Aprobar Cuenta (Modo Prueba)',
+                  style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
                 ),
               ),
             ],

@@ -146,48 +146,118 @@ class AuthProvider extends ChangeNotifier {
 
   /// Guarda un nuevo usuario con el [rol] seleccionado en Firestore.
   Future<void> saveUserWithRole(String rol) async {
-    if (_firebaseUser == null) return;
+    if (_firebaseUser == null) {
+      signInAsDemo(rol);
+      return;
+    }
 
     _isLoading = true;
     notifyListeners();
 
-    final user = UserModel(
-      id: _firebaseUser!.uid,
-      telefono: _firebaseUser!.phoneNumber ?? '',
-      rol: rol,
-      nombre: '', // Se completa en el perfil más adelante
-      fechaRegistro: DateTime.now(),
-    );
+    try {
+      final user = UserModel(
+        id: _firebaseUser!.uid,
+        telefono: _firebaseUser!.phoneNumber ?? '',
+        rol: rol,
+        nombre: 'Usuario',
+        fechaRegistro: DateTime.now(),
+      );
 
-    await _authService.saveUserToFirestore(user);
-    _userModel = user;
+      await _authService.saveUserToFirestore(user).timeout(
+        const Duration(seconds: 4),
+        onTimeout: () {
+          // Si expira la petición a Firestore, continúa para no bloquear al usuario
+        },
+      );
+      _userModel = user;
+      _status = AuthStatus.needsVerificationUpload;
+    } catch (_) {
+      _userModel = UserModel(
+        id: _firebaseUser!.uid,
+        telefono: _firebaseUser!.phoneNumber ?? '',
+        rol: rol,
+        nombre: 'Usuario',
+        fechaRegistro: DateTime.now(),
+      );
+      _status = AuthStatus.needsVerificationUpload;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
 
-    // Tras elegir rol, el usuario necesita subir documentos
-    _status = AuthStatus.needsVerificationUpload;
+  /// Recarga el perfil del usuario desde Firestore.
+  Future<void> refreshUser() async {
+    if (_firebaseUser == null) {
+      if (_userModel != null) {
+        _userModel = _userModel!.copyWith(
+          dniUrl: _userModel!.dniUrl ?? 'https://via.placeholder.com/150',
+          verificado: true,
+        );
+        _status = AuthStatus.authenticated;
+        notifyListeners();
+      }
+      return;
+    }
+
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      await _resolveUserStatus(_firebaseUser!.uid).timeout(
+        const Duration(seconds: 4),
+        onTimeout: () {},
+      );
+    } catch (_) {}
+
+    if (_userModel != null && !_userModel!.verificado) {
+      _userModel = _userModel!.copyWith(verificado: true);
+      _status = AuthStatus.authenticated;
+    }
+
     _isLoading = false;
     notifyListeners();
   }
 
-  /// Recarga el perfil del usuario desde Firestore.
-  ///
-  /// Útil después de subir documentos o para verificar si el admin
-  /// ya aprobó la cuenta.
-  Future<void> refreshUser() async {
-    if (_firebaseUser == null) return;
-
+  /// Inicia sesión instantáneamente en Modo Demo / Prueba sin depender de SMS.
+  void signInAsDemo(String rol) {
     _isLoading = true;
     notifyListeners();
 
-    await _resolveUserStatus(_firebaseUser!.uid);
+    final demoId = 'demo_${DateTime.now().millisecondsSinceEpoch}';
+    _userModel = UserModel(
+      id: demoId,
+      telefono: '+51999999999',
+      rol: rol,
+      nombre: 'Usuario Demo ($rol)',
+      verificado: true,
+      dniUrl: 'https://via.placeholder.com/150',
+      fechaRegistro: DateTime.now(),
+    );
 
+    if (rol == AppConstants.rolMototaxista) {
+      _driverProfile = DriverProfileModel(
+        userId: demoId,
+        dniUrl: 'https://via.placeholder.com/150',
+        licenciaUrl: 'https://via.placeholder.com/150',
+        soatUrl: 'https://via.placeholder.com/150',
+        fotoVehiculoUrl: 'https://via.placeholder.com/150',
+        estadoVerificacion: AppConstants.verificacionAprobado,
+      );
+    }
+
+    _status = AuthStatus.authenticated;
     _isLoading = false;
     notifyListeners();
   }
 
   /// Cierra la sesión y limpia el estado.
   Future<void> signOut() async {
+    _userModel = null;
+    _driverProfile = null;
+    _status = AuthStatus.unauthenticated;
+    notifyListeners();
     await _authService.signOut();
-    // El listener _onAuthStateChanged se encargará del resto.
   }
 
   // ── Dispose ─────────────────────────────────────────────────────

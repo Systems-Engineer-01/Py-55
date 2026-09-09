@@ -48,17 +48,26 @@ class _PassengerMapScreenState extends State<PassengerMapScreen> {
   Future<void> _initPassengerLocation() async {
     setState(() => _isLoadingLocation = true);
 
-    final position = await LocationService.getCurrentPosition();
-    if (mounted) {
-      setState(() {
-        _currentPosition = position;
-        _isLoadingLocation = false;
-      });
+    try {
+      final position = await LocationService.getCurrentPosition().timeout(
+        const Duration(seconds: 3),
+        onTimeout: () => null,
+      );
+      if (mounted) {
+        setState(() {
+          _currentPosition = position;
+          _isLoadingLocation = false;
+        });
 
-      if (position != null) {
-        _mapController?.animateCamera(
-          CameraUpdate.newLatLng(LatLng(position.latitude, position.longitude)),
-        );
+        if (position != null) {
+          _mapController?.animateCamera(
+            CameraUpdate.newLatLng(LatLng(position.latitude, position.longitude)),
+          );
+        }
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() => _isLoadingLocation = false);
       }
     }
   }
@@ -271,6 +280,24 @@ class _PassengerMapScreenState extends State<PassengerMapScreen> {
     );
   }
 
+  Future<void> _simulateActiveDriver() async {
+    await _mapService.updateDriverLocation(
+      driverId: 'demo_mototaxi_1',
+      latitude: (_currentPosition?.latitude ?? -12.046374) + 0.003,
+      longitude: (_currentPosition?.longitude ?? -77.042793) + 0.003,
+      heading: 45.0,
+    );
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('¡Mototaxi de prueba agregada al mapa!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final user = context.watch<AuthProvider>().userModel;
@@ -282,6 +309,11 @@ class _PassengerMapScreenState extends State<PassengerMapScreen> {
       appBar: AppBar(
         title: Text('Hola, ${user?.nombre ?? 'Pasajero'}'),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.flash_on_rounded),
+            tooltip: 'Simular Mototaxi Cercana',
+            onPressed: _simulateActiveDriver,
+          ),
           IconButton(
             icon: const Icon(Icons.logout_rounded),
             tooltip: 'Cerrar sesión',

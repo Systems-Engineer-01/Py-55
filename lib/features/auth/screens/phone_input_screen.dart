@@ -1,6 +1,9 @@
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart' hide AuthProvider;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
+import 'package:py55/core/constants.dart';
+import 'package:py55/features/auth/auth_provider.dart';
 import 'package:py55/features/auth/auth_service.dart';
 import 'package:py55/features/auth/screens/otp_verification_screen.dart';
 
@@ -89,6 +92,30 @@ class _PhoneInputScreenState extends State<PhoneInputScreen> {
         // No-op: el usuario puede seguir ingresando el código manualmente.
       },
     );
+  }
+
+  Future<void> _signInDemo() async {
+    final selectedRole = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Modo Demo / Prueba'),
+        content: const Text('Selecciona el rol para ingresar directamente:'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, AppConstants.rolPasajero),
+            child: const Text('Pasajero'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, AppConstants.rolMototaxista),
+            child: const Text('Mototaxista'),
+          ),
+        ],
+      ),
+    );
+
+    if (selectedRole != null && mounted) {
+      context.read<AuthProvider>().signInAsDemo(selectedRole);
+    }
   }
 
   @override
@@ -229,6 +256,15 @@ class _PhoneInputScreenState extends State<PhoneInputScreen> {
                           style: TextStyle(fontSize: 16),
                         ),
                 ),
+              ),
+
+              const SizedBox(height: 16),
+
+              // ── Botón Modo Demo ──
+              TextButton.icon(
+                onPressed: _isLoading ? null : _signInDemo,
+                icon: const Icon(Icons.flash_on_rounded),
+                label: const Text('Ingresar en Modo Demo / Prueba'),
               ),
             ],
           ),

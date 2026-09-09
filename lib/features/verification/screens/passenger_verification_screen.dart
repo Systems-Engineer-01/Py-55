@@ -68,8 +68,10 @@ class _PassengerVerificationScreenState
       return;
     }
 
-    final userId = context.read<AuthProvider>().firebaseUser?.uid;
-    if (userId == null) return;
+    final authProvider = context.read<AuthProvider>();
+    final userId = authProvider.userModel?.id ??
+        authProvider.firebaseUser?.uid ??
+        'demo_user';
 
     setState(() {
       _isUploading = true;
@@ -84,7 +86,7 @@ class _PassengerVerificationScreenState
 
       // Refrescar estado en AuthProvider
       if (mounted) {
-        await context.read<AuthProvider>().refreshUser();
+        await authProvider.refreshUser();
       }
     } catch (e) {
       if (!mounted) return;
