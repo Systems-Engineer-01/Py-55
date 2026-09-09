@@ -8,6 +8,7 @@ import 'package:py55/features/fare/fare_calculator_service.dart';
 import 'package:py55/features/map/location_service.dart';
 import 'package:py55/features/ride_request/ride_request_service.dart';
 import 'package:py55/features/ride_request/screens/ride_searching_screen.dart';
+import 'package:py55/features/ride_request/widgets/destination_search_bar.dart';
 import 'package:py55/shared/models/ride_request_model.dart';
 
 /// Pantalla para que el pasajero fije el origen y destino en el mapa,
@@ -257,56 +258,75 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
             zoomControlsEnabled: false,
           ),
 
-          // Header con direcciones de origen y destino
+          // Header con buscador de destino y resumen de direcciones
           Positioned(
             top: 16,
             left: 16,
             right: 16,
-            child: Card(
-              elevation: 4,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(12.0),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Row(
-                      children: [
-                        const Icon(Icons.circle, color: Colors.green, size: 14),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            'Origen: $_originAddress',
-                            style: const TextStyle(fontWeight: FontWeight.w500),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const Divider(height: 16),
-                    Row(
-                      children: [
-                        const Icon(Icons.location_on, color: Colors.red, size: 18),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Text(
-                            'Destino: $_destinationAddress',
-                            style: TextStyle(
-                              fontWeight: FontWeight.w600,
-                              color: _destination != null
-                                  ? Colors.black87
-                                  : AppTheme.primaryColor,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // 1. Buscador de destino por nombre con autocompletado (Perú)
+                DestinationSearchBar(
+                  onDestinationSelected: (location, addressName) {
+                    setState(() {
+                      _destination = location;
+                      _destinationAddress = addressName;
+                      _updateFareEstimate();
+                    });
+                    _fitMapToPoints();
+                  },
                 ),
-              ),
+                const SizedBox(height: 8),
+
+                // 2. Tarjeta con estado de Origen y Destino
+                Card(
+                  elevation: 4,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Row(
+                          children: [
+                            const Icon(Icons.circle, color: Colors.green, size: 14),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                'Origen: $_originAddress',
+                                style: const TextStyle(fontWeight: FontWeight.w500),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const Divider(height: 16),
+                        Row(
+                          children: [
+                            const Icon(Icons.location_on, color: Colors.red, size: 18),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Text(
+                                'Destino: $_destinationAddress',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  color: _destination != null
+                                      ? Colors.black87
+                                      : AppTheme.primaryColor,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
 
