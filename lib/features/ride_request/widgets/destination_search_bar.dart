@@ -9,15 +9,17 @@ typedef OnDestinationSelected = void Function(
     LatLng location, String addressName);
 
 /// Widget que ofrece un campo de búsqueda de destino con autocompletado debounced (400ms)
-/// usando la API de Google Places filtrando por Perú.
+/// usando la API de Google Places (con fallback Nominatim para Perú).
 class DestinationSearchBar extends StatefulWidget {
   final OnDestinationSelected onDestinationSelected;
   final PlacesService? placesService;
+  final LatLng? userLocation;
 
   const DestinationSearchBar({
     super.key,
     required this.onDestinationSelected,
     this.placesService,
+    this.userLocation,
   });
 
   @override
@@ -78,15 +80,17 @@ class _DestinationSearchBarState extends State<DestinationSearchBar> {
       });
 
       try {
-        final results =
-            await _placesService.getAutocompleteSuggestions(query);
+        final results = await _placesService.getAutocompleteSuggestions(
+          query,
+          userLocation: widget.userLocation,
+        );
         if (!mounted) return;
 
         setState(() {
           _predictions = results;
           _isSearching = false;
           if (results.isEmpty) {
-            _errorMessage = 'No se encontraron resultados en Perú';
+            _errorMessage = 'No se encontraron resultados para "$query" en Perú';
           }
         });
       } catch (e) {

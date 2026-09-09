@@ -70,7 +70,14 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
       _updateFareEstimate();
     }
 
-    if (mounted) setState(() {});
+    if (mounted) {
+      setState(() {});
+      if (_origin != null && _mapController != null) {
+        _mapController!.animateCamera(
+          CameraUpdate.newLatLngZoom(_origin!, 16.0),
+        );
+      }
+    }
   }
 
   void _onMapTapped(LatLng point) {
@@ -249,7 +256,14 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
               target: initialTarget,
               zoom: 15.0,
             ),
-            onMapCreated: (controller) => _mapController = controller,
+            onMapCreated: (controller) {
+              _mapController = controller;
+              if (_origin != null) {
+                _mapController!.animateCamera(
+                  CameraUpdate.newLatLngZoom(_origin!, 16.0),
+                );
+              }
+            },
             onTap: _onMapTapped,
             markers: _buildMarkers(),
             polylines: _buildPolylines(),
@@ -268,6 +282,7 @@ class _RideRequestScreenState extends State<RideRequestScreen> {
               children: [
                 // 1. Buscador de destino por nombre con autocompletado (Perú)
                 DestinationSearchBar(
+                  userLocation: _origin,
                   onDestinationSelected: (location, addressName) {
                     setState(() {
                       _destination = location;
