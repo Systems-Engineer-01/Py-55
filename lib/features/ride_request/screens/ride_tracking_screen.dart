@@ -2,13 +2,16 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:provider/provider.dart';
 import 'package:py55/core/constants.dart';
 import 'package:py55/core/theme.dart';
+import 'package:py55/features/auth/auth_provider.dart';
 import 'package:py55/features/map/map_service.dart';
 import 'package:py55/features/map/models/driver_location_model.dart';
 import 'package:py55/features/rating/screens/rating_screen.dart';
 import 'package:py55/features/ride_request/ride_request_service.dart';
 import 'package:py55/shared/models/ride_request_model.dart';
+import 'package:py55/shared/widgets/panic_button.dart';
 
 /// Pantalla de seguimiento del viaje en vivo para Pasajero y Mototaxista.
 /// Muestra el mapa con la ubicación en tiempo real del conductor y el indicador de estado por pasos.
@@ -183,6 +186,7 @@ class _RideTrackingScreenState extends State<RideTrackingScreen> {
   @override
   Widget build(BuildContext context) {
     final isDriver = widget.userRole == AppConstants.rolMototaxista;
+    final user = context.watch<AuthProvider>().userModel;
 
     return Scaffold(
       appBar: AppBar(
@@ -236,6 +240,19 @@ class _RideTrackingScreenState extends State<RideTrackingScreen> {
                 myLocationEnabled: true,
                 zoomControlsEnabled: false,
               ),
+
+              // Botón de Pánico flotante en pantalla (para Pasajero y Conductor)
+              if (user != null &&
+                  (ride.estado == AppConstants.rideAceptado ||
+                      ride.estado == AppConstants.rideEnCurso))
+                Positioned(
+                  right: 16,
+                  bottom: 180,
+                  child: PanicButton(
+                    rideId: ride.id,
+                    user: user,
+                  ),
+                ),
 
               // Panel superior de Step Indicator de Estado del Viaje
               Positioned(

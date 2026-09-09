@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:py55/core/constants.dart';
+import 'package:py55/features/admin/screens/admin_monitoring_screen.dart';
 import 'package:py55/features/auth/auth_provider.dart';
 import 'package:py55/shared/models/driver_profile_model.dart';
 
@@ -121,7 +122,21 @@ class _AdminVerificationScreenState extends State<AdminVerificationScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Panel Admin: Verificación de Conductores'),
+        title: const Text('Panel Admin: Verificación'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.security_rounded),
+            tooltip: 'Monitoreo en Vivo & Alertas',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const AdminMonitoringScreen(),
+                ),
+              );
+            },
+          ),
+        ],
       ),
       body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
         stream: _firestore

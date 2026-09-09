@@ -59,5 +59,16 @@ service cloud.firestore {
         allow update, delete: if isAdmin();
       }
     }
+
+    // ── Colección de Alertas de Pánico ─────────────────────────────
+    match /alertas_panico/{alertId} {
+      // Cualquier usuario autenticado puede crear una alerta solo a su propio nombre
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      // Lectura permitida si es el propio emisor o si es Administrador
+      allow read: if isAuthenticated() && (resource.data.userId == request.auth.uid || isAdmin());
+      // Solo Administradores pueden actualizar el estado a "atendida" o eliminar
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
   }
 }
